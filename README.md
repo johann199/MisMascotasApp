@@ -18,4 +18,12 @@
 - Cada commit se debe nomenclar asi añoMesDia-Nombre o iniciales del desarrollador:
   - Ejemplo: 20250912-Johann o 20250912-JAGG
   - Posteriormente lo que se desarrolla o se quiere subir al repo.
-- Actualmente esta la rama main pero en el proceso, se subiran los cambios primeramente a una rama auxiliar a parte de la del desarrollador.
+## GitFlow - Manejo de Ramas
+### Estructura de Ramas
+El proyecto utilizará GitFlow para organizar el desarrollo de manera eficiente:
+**Ramas principales:**
+- `main` - Rama de producción con código estable
+- `develop` - Rama de integración para desarrollo activo
+**Ramas de soporte:**
+- `feature/nombre-funcionalidad` - Para desarrollar nuevas características (Debe salir de develop)
+- `hotfix/descripcion-fix` - Para correcciones urgentes en producción (Debe salir de main)
