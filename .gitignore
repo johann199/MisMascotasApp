@@ -1,1 +1,148 @@
-.idea
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs y dumps
+*.log
+dump.rdb
+
+# Python
+__pycache__
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+**/__pycache__/**
+*.pyc
+*.pyo
+*.pyd
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Distribución / empaquetado
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Entornos virtuales (específicos para backend)
+bakend/env/
+bakend/venv/
+bakend/.env
+bakend/.venv
+bakend/ENV/
+bakend/env.bak/
+bakend/venv.bak/
+
+# Variables de entorno
+.env
+.env.local
+.env.prod
+.env.development
+.env.production
+
+# Django específico
+bakend/db.sqlite3
+bakend/db.sqlite3-journal
+bakend/local_settings.py
+bakend/media/
+bakend/staticfiles/
+
+# Migraciones de Django (mantener solo __init__.py)
+bakend/**/migrations/*.py
+bakend/**/migrations/*.pyc
+!bakend/**/migrations/__init__.py
+
+# Credenciales de Firebase
+bakend/jsonApi/
+**/*.json
+!package.json
+!**/package*.json
+
+# Coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Android Studio / Kotlin (para futuro frontend)
+*.iml
+.gradle/
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
