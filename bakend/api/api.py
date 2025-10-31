@@ -2,27 +2,46 @@ import os.path
 
 import firebase_admin
 from ninja import NinjaAPI
-from firebase_admin import credentials, firestore
+from usuarios.utils import  initialize_firebase, get_firestore_client
+from usuarios.views import router as usuarios_router
 
-json_path ="jsonApi/mimascotasapp-firebase-adminsdk-fbsvc-9278304e5b.json"
 
-if not os.path.exists(json_path):
-    raise FileNotFoundError(f"Not exit file: {json_path}")
-print(f"file is hire: {os.path.abspath(json_path)}")
+initialize_firebase()
 
-cred = credentials.Certificate("jsonApi/mimascotasapp-firebase-adminsdk-fbsvc-9278304e5b.json")
-firebase_admin.initialize_app(cred)
-api = NinjaAPI()
 
-@api.get("/test")
-def test(request):
-    try:
-        db = firestore.client()
-        print(f"client created sucefull {db}")
-        colletions = db.collections()
+api = NinjaAPI(
+    title="Mi Mascotas App API",
+    version="1.0.0",
+    description="API para gestión de mascotas con autenticación Firebase/Google",
+    docs_url="/docs"
+)
 
-        print(f"Conection in Fiestore sucefull")
-        return {'message': 'Firebase Conected successfully', 'status': 'ok'}
-    except Exception as e:
-        print(f'Error connet to Firestore: {str(e)}')
-        return {'message': 'Firestore Connection Error', 'error': str(e)}
+api.add_router("/auth", usuarios_router, tags=["Autenticación"])
+
+@api.get("/health", tags=["Health"])
+def health_check(request):
+    """
+    Endpoint simple para verificar que la API está funcionando
+    """
+    return {
+        'status': 'ok',
+        'message': 'API funcionando correctamente',
+        'version': '1.0.0'
+    }
+
+
+@api.get("/", tags=["Root"])
+def root(request):
+    """
+    Endpoint raíz - información de la API
+    """
+    return {
+        'name': 'Mi Mascotas App API',
+        'version': '1.0.0',
+        'docs': '/api/docs',
+        'endpoints': {
+            'auth': '/api/auth',
+            'health': '/api/health',
+            'test': '/api/test'
+        }
+    }
