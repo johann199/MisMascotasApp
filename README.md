@@ -27,3 +27,43 @@ El proyecto utilizará GitFlow para organizar el desarrollo de manera eficiente:
 **Ramas de soporte:**
 - `feature/nombre-funcionalidad` - Para desarrollar nuevas características (Debe salir de develop)
 - `hotfix/descripcion-fix` - Para correcciones urgentes en producción (Debe salir de main)
+
+
+## Instalación react native
+### Requisitos previos
+
+- Node.js (LTS) instalado (versión LTS recomendada).
+
+- npm (viene con Node) o yarn / pnpm (opcional).
+
+- En macOS: Xcode para usar el simulador iOS (si vas a compilar localmente para iOS).
+
+##### Comandos
+- npm install: instala las dependencias del proyecto
+- npx expo start: ejecuta la aplicación
+##### Nota
+- Los comandos anteriores deben ser ejecutados dentro de la carpeta frontend
+
+###### Expo Go
+- Descarga la app: Expo Go en tu dispositivo movil
+- Al ejecutar npx expo start, saldra un QR, escanea desde la App y correra
+
+### Doker file.
+
+- Se agrega la imagen doker con la conexión a la base de datos
+- instalar en la carpeta backend y dentro del entorno virtual psycopg2 con pip install, o ejecutar el comando para instalar los requerimientos de python.
+
+##### Ejecutar la imagen Docker
+- Ejecuta los comandos:
+   - docker-compose down
+   - docker-compose up -d
+###### Nota:
+- No cambiare el puerto, si no tienen mas contenedores con postgresSql, no va a presentar errores, y si el puerto 5434 no funciona, modifiquenlo al 35 o 36, pero con el 34 funciona bien, 
+- Johann lo hace de esa forma porque tiene el postgres en el os y genera error en el puerto 5432 y a su vez tengo contenerores que ejecutan el puerto 5433 de postgres. 
+- Si el puerto falla, ejecuten los siguientes comandos: 
+   - docker stop mimascotasapp
+   - docker rm mimascotasapp
+   - docker-compose down -v
+   - docker system prune -f
+   #### Levanta la imagen de nuevo
+   - docker-compose up -d

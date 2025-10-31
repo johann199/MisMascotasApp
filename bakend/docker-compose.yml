@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mimascotasapp
+    restart: always
+    environment:
+      POSTGRES_DB: mimascotasapp
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin1234
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5434:5432" # Modifica el puerto si falla, por conflicto con otro servicio
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mimascotasapp_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mimascotasapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  mimascotasapp_network:
+    driver: bridge
