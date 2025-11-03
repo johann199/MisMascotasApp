@@ -1,10 +1,10 @@
+import {NGROK_URL} from '@env';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const getApiUrl = () => {
   if (__DEV__) {
-    const LOCAL_IP = '127.0.0.1';  // ← CAMBIA ESTO POR TU IP
-    return `http://${LOCAL_IP}:8000/api`;
+    return `${NGROK_URL}/api`; // Solo añades el path /api
   }
   return 'https://mismascotasApp.com/api'; // no existe, este es solo un ejemplo
 };

@@ -14,7 +14,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-9lwf2@oi)kvl#p9zyhzd&w&pcf
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1'] 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.getenv('NGROK_URL')] 
 
 
 MEDIA_URL = '/media/'
