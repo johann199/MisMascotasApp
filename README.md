@@ -67,3 +67,30 @@ El proyecto utilizará GitFlow para organizar el desarrollo de manera eficiente:
    - docker system prune -f
    #### Levanta la imagen de nuevo
    - docker-compose up -d
+
+#### .env Backend
+- crear un archivo .env en la carpeta backend con las siguientes variables: 
+   DB_ENGINE=django.db.backends.postgresql
+   DB_NAME=mimascotasapp
+   DB_USER=admin
+   DB_PASSWORD=admin1234
+   DB_HOST=localhost
+   DB_PORT=5434
+
+   # Django Settings
+   SECRET_KEY=
+   DEBUG=True
+   ALLOWED_HOSTS=localhost,127.0.0.1
+
+   # Firebase
+   FIREBASE_PROJECT_ID=mimascotasapp
+
+   # Ngrok
+   NGROK_URL= ingresar a ngrok y sacar la url del proyecto, sin el http
+
+### .env Frontend
+- Crear un archivo .env em la carpeta frontend y escribir las siguientes variables de entorno
+
+NGROK_URL="ir a la url de ngrok para la url, aquí si debe ir con http"
+
+Url de ngrok: https://ngrok.com/
