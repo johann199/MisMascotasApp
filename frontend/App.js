@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, ActivityIndicator, Button } from 'react-native'
 import { AuthProvider } from './src/context/AuthContext';
 import { healthAPI } from './src/api/endpoints';
 import { API_URL } from './src/config/api';
+import LoginScreen from './src/screens/LoginScreen';
 
 export default function App() {
   const [connectionStatus, setConnectionStatus] = useState('checking');
@@ -11,11 +12,11 @@ export default function App() {
   const testConnection = async () => {
     setConnectionStatus('checking');
     setError(null);
-    
+
     console.log('Probando conexión con:', API_URL);
-    
+
     const result = await healthAPI.check();
-    
+
     if (result.success) {
       console.log('Conectado:', result.data);
       setConnectionStatus('connected');
@@ -61,9 +62,8 @@ export default function App() {
   return (
     <AuthProvider>
       <View style={styles.container}>
-        <Text style={styles.successText}>Conectado al servidor</Text>
-        <Text style={styles.apiUrl}>{API_URL}</Text>
-        {/* navegación y screens */}
+        <LoginScreen />
+        {/* home */}
       </View>
     </AuthProvider>
   );

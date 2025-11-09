@@ -6,7 +6,7 @@
 4. Activar el entorno virtual: 
    - Para linux: source .venv/bin/activate
    - Para windows: .venv\Scripts\activate
-5. Ejecutar el comando pip install -r requirements.tx
+5. Ejecutar el comando pip install -r requirements.txt
 
 ### Instalaciones iniciales que se realizaran en el backend
 1. Se instalara la libreria de firebase para interactuar con el administrador de firebase.
