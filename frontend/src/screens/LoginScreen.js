@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState('Inicio');
@@ -79,7 +79,7 @@ export default function LoginScreen() {
 
             <View style={styles.registerContainer}>
               <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                 <Text style={styles.registerLink}>Regístrate</Text>
               </TouchableOpacity>
             </View>

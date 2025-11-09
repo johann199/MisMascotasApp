@@ -3,8 +3,21 @@ import { StyleSheet, Text, View, ActivityIndicator, Button } from 'react-native'
 import { AuthProvider } from './src/context/AuthContext';
 import { healthAPI } from './src/api/endpoints';
 import { API_URL } from './src/config/api';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './src/screens/LoginScreen';
+import RegisterScreen from './src/screens/RegisterScreen';
 
+const Stack = createNativeStackNavigator();
+// estos son los stacks de autenticación, si necesitan otros stacks, crear otra función similar con la navegación correspondiente al modulo.
+function AuthStack() {
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+    </Stack.Navigator>
+  );
+}
 export default function App() {
   const [connectionStatus, setConnectionStatus] = useState('checking');
   const [error, setError] = useState(null);
@@ -61,10 +74,10 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <View style={styles.container}>
-        <LoginScreen />
-        {/* home */}
-      </View>
+      <NavigationContainer>
+        {/*Aqui se agregan el resto de funciones para navegación */}
+        <AuthStack />
+      </NavigationContainer>
     </AuthProvider>
   );
 }
