@@ -7,6 +7,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
+import Navegacion from './Navigation';
 
 const Stack = createNativeStackNavigator();
 // estos son los stacks de autenticación, si necesitan otros stacks, crear otra función similar con la navegación correspondiente al modulo.
@@ -73,12 +74,7 @@ export default function App() {
   }
 
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        {/*Aqui se agregan el resto de funciones para navegación */}
-        <AuthStack />
-      </NavigationContainer>
-    </AuthProvider>
+    <Navegacion />  
   );
 }
 
