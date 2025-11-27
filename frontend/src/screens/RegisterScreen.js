@@ -7,10 +7,15 @@ import {
   StyleSheet,
   ScrollView,
   StatusBar,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AuthService  from '../services/authService';
 
-// Componente del Logo
+// Componente del Logo (mantén tu código actual)
 const ComeBackLogo = ({ size = 'small' }) => {
   const scale = size === 'large' ? 1 : 0.7;
   
@@ -35,6 +40,7 @@ const ComeBackLogo = ({ size = 'small' }) => {
     </View>
   );
 };
+
 export default function RegisterScreen({ navigation }) {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -42,22 +48,140 @@ export default function RegisterScreen({ navigation }) {
     username: '',
     email: '',
     password: '',
+    confirmPassword: '', // Agregar confirmación
     edad: '',
     telefono: '',
     biografia: '',
   });
 
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Limpiar error del campo al escribir
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: null }));
+    }
+  };
+
+  // Validar formulario
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Validar campos requeridos
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'El nombre es requerido';
+    }
+    
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'El apellido es requerido';
+    }
+
+    if (!formData.username.trim()) {
+      newErrors.username = 'El nombre de usuario es requerido';
+    } else if (formData.username.length < 3) {
+      newErrors.username = 'Mínimo 3 caracteres';
+    }
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      newErrors.email = 'El email es requerido';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Email inválido';
+    }
+
+    // Validar teléfono
+    if (!formData.telefono.trim()) {
+      newErrors.telefono = 'El teléfono es requerido';
+    } else if (formData.telefono.length < 10) {
+      newErrors.telefono = 'Teléfono inválido (mínimo 10 dígitos)';
+    }
+
+    // Validar contraseña
+    if (!formData.password) {
+      newErrors.password = 'La contraseña es requerida';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Mínimo 6 caracteres';
+    }
+
+    // Validar confirmación de contraseña
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Confirma tu contraseña';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Las contraseñas no coinciden';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Manejar registro
+  const handleRegister = async () => {
+    if (!validateForm()) {
+      Alert.alert('Error', 'Por favor completa correctamente todos los campos');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const registerData = {
+      email: formData.email.trim(),
+      password: formData.password,
+      username: formData.username.trim(),
+      first_name: formData.firstName.trim() || '',
+      last_name: formData.lastName.trim() || '',
+      telefono: formData.telefono ? parseInt(formData.telefono) : null,
+      edad: formData.edad ? parseInt(formData.edad) : null,
+      biografia: formData.biografia.trim() || '',
+      };
+      console.log('Enviando registro con datos:', registerData);
+
+      const result = await AuthService.register(registerData);
+
+      setLoading(false);
+
+      if (result.success) {
+        Alert.alert(
+          '¡Registro exitoso!',
+          'Tu cuenta ha sido creada correctamente',
+          [
+            {
+              text: 'Continuar',
+                onPress: () => {
+                  // App.js detectará automáticamente que hay una sesión activa
+                }
+            }
+          ]
+        );
+      } else {
+        Alert.alert('Error al registrar', result.error);
+      }
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', 'Ocurrió un error inesperado. Intenta nuevamente.');
+      console.error('Error en registro:', error);
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <StatusBar barStyle="dark-content" />
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.navigate('Login')}
+        >
           <Ionicons name="arrow-back" size={24} color="#4FC3F7" />
         </TouchableOpacity>
         <View style={styles.helpButton}>
@@ -68,6 +192,7 @@ export default function RegisterScreen({ navigation }) {
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Logo */}
         <View style={styles.logoContainer}>
@@ -83,44 +208,53 @@ export default function RegisterScreen({ navigation }) {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Nombre *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.firstName && styles.inputError]}
               placeholder="Ingresa tu nombre"
               placeholderTextColor="#999"
               value={formData.firstName}
               onChangeText={(value) => updateField('firstName', value)}
             />
+            {errors.firstName && (
+              <Text style={styles.errorText}>{errors.firstName}</Text>
+            )}
           </View>
 
           {/* Apellido */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Apellido *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.lastName && styles.inputError]}
               placeholder="Ingresa tu apellido"
               placeholderTextColor="#999"
               value={formData.lastName}
               onChangeText={(value) => updateField('lastName', value)}
             />
+            {errors.lastName && (
+              <Text style={styles.errorText}>{errors.lastName}</Text>
+            )}
           </View>
 
           {/* Username */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Nombre de usuario *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.username && styles.inputError]}
               placeholder="Elige un nombre de usuario"
               placeholderTextColor="#999"
               value={formData.username}
               onChangeText={(value) => updateField('username', value)}
               autoCapitalize="none"
             />
+            {errors.username && (
+              <Text style={styles.errorText}>{errors.username}</Text>
+            )}
           </View>
 
           {/* Email */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.email && styles.inputError]}
               placeholder="correo@ejemplo.com"
               placeholderTextColor="#999"
               value={formData.email}
@@ -128,19 +262,25 @@ export default function RegisterScreen({ navigation }) {
               keyboardType="email-address"
               autoCapitalize="none"
             />
+            {errors.email && (
+              <Text style={styles.errorText}>{errors.email}</Text>
+            )}
           </View>
 
           {/* Teléfono */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Teléfono *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.telefono && styles.inputError]}
               placeholder="3001234567"
               placeholderTextColor="#999"
               value={formData.telefono}
               onChangeText={(value) => updateField('telefono', value)}
               keyboardType="phone-pad"
             />
+            {errors.telefono && (
+              <Text style={styles.errorText}>{errors.telefono}</Text>
+            )}
           </View>
 
           {/* Edad */}
@@ -159,14 +299,65 @@ export default function RegisterScreen({ navigation }) {
           {/* Contraseña */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Contraseña *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Mínimo 6 caracteres"
-              placeholderTextColor="#999"
-              value={formData.password}
-              onChangeText={(value) => updateField('password', value)}
-              secureTextEntry
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={[
+                  styles.input, 
+                  styles.passwordInput,
+                  errors.password && styles.inputError
+                ]}
+                placeholder="Mínimo 6 caracteres"
+                placeholderTextColor="#999"
+                value={formData.password}
+                onChangeText={(value) => updateField('password', value)}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons 
+                  name={showPassword ? "eye-outline" : "eye-off-outline"} 
+                  size={22} 
+                  color="#999" 
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.password && (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            )}
+          </View>
+
+          {/* Confirmar Contraseña */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Confirmar Contraseña *</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={[
+                  styles.input, 
+                  styles.passwordInput,
+                  errors.confirmPassword && styles.inputError
+                ]}
+                placeholder="Repite tu contraseña"
+                placeholderTextColor="#999"
+                value={formData.confirmPassword}
+                onChangeText={(value) => updateField('confirmPassword', value)}
+                secureTextEntry={!showConfirmPassword}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <Ionicons 
+                  name={showConfirmPassword ? "eye-outline" : "eye-off-outline"} 
+                  size={22} 
+                  color="#999" 
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.confirmPassword && (
+              <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+            )}
           </View>
 
           {/* Biografía */}
@@ -188,20 +379,28 @@ export default function RegisterScreen({ navigation }) {
           </View>
 
           {/* Botón de Registro */}
-          <TouchableOpacity style={styles.registerButton}>
-            <Text style={styles.registerButtonText}>Crear Cuenta</Text>
+          <TouchableOpacity 
+            style={[styles.registerButton, loading && styles.buttonDisabled]}
+            onPress={handleRegister}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.registerButtonText}>Crear Cuenta</Text>
+            )}
           </TouchableOpacity>
 
           {/* Link a Login */}
           <View style={styles.loginContainer}>
             <Text style={styles.loginText}>¿Ya tienes cuenta? </Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text style={styles.loginLink}>Inicia Sesión</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -223,11 +422,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 5,
-  },
-  headerTitle: {
-    fontSize: 18,
-    color: '#333',
-    fontWeight: '600',
   },
   helpButton: {
     width: 28,
@@ -367,6 +561,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0E0E0',
   },
+  inputError: {
+    borderColor: '#E74C3C',
+    borderWidth: 1.5,
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#E74C3C',
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  passwordContainer: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 50,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 15,
+    top: 15,
+    padding: 5,
+  },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
@@ -390,6 +606,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
+  },
+  buttonDisabled: {
+    backgroundColor: '#B0B0B0',
   },
   registerButtonText: {
     color: '#fff',

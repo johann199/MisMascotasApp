@@ -7,32 +7,187 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import mascotasServices from '../services/mascotasServices';
 
 const ReportarMascotaPerdidaScreen = ({ navigation }) => {
-  const [nombre, setNombre] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [fecha, setFecha] = useState('');
-  const [raza, setRaza] = useState('');
-  const [imagen, setImagen] = useState(null);
+  const [formData, setFormData] = useState({
+    nombre: '',
+    descripcion: '',
+    dia: '',
+    raza: '',
+  });
   
+  const [imagen, setImagen] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSeleccionarImagen = () => {
-    // Aquí integrarías react-native-image-picker o expo-image-picker
-    console.log('Seleccionar imagen');
-    Alert.alert('Funcionalidad', 'Aquí se abrirá el selector de imágenes');
+  // Actualizar campos individuales
+  const updateField = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubirReporte = () => {
-    if (!nombre || !descripcion || !fecha || !raza) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+  // Seleccionar imagen de la galería
+  const handleSeleccionarImagen = async () => {
+    try {
+      // Solicitar permisos
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permiso requerido',
+          'Se necesita acceso a la galería para seleccionar una imagen'
+        );
+        return;
+      }
+
+      // Abrir selector de imágenes
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8, // Compresión para reducir tamaño
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setImagen(result.assets[0].uri);
+        console.log('Imagen seleccionada:', result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error al seleccionar imagen:', error);
+      Alert.alert('Error', 'No se pudo seleccionar la imagen');
+    }
+  };
+
+  // Tomar foto con la cámara
+  const handleTomarFoto = async () => {
+    try {
+      // Solicitar permisos
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permiso requerido',
+          'Se necesita acceso a la cámara para tomar una foto'
+        );
+        return;
+      }
+
+      // Abrir cámara
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setImagen(result.assets[0].uri);
+        console.log('Foto tomada:', result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error al tomar foto:', error);
+      Alert.alert('Error', 'No se pudo tomar la foto');
+    }
+  };
+
+  // Mostrar opciones de imagen
+  const handleOpcionesImagen = () => {
+    Alert.alert(
+      'Seleccionar imagen',
+      'Elige una opción',
+      [
+        {
+          text: 'Tomar foto',
+          onPress: handleTomarFoto,
+        },
+        {
+          text: 'Elegir de galería',
+          onPress: handleSeleccionarImagen,
+        },
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+      ]
+    );
+  };
+
+  // Validar formulario
+  const validarFormulario = () => {
+    if (!formData.nombre.trim()) {
+      Alert.alert('Error', 'El nombre de la mascota es requerido');
+      return false;
+    }
+    if (!formData.raza.trim()) {
+      Alert.alert('Error', 'La raza es requerida');
+      return false;
+    }
+    if (!formData.descripcion.trim()) {
+      Alert.alert('Error', 'La descripción es requerida');
+      return false;
+    }
+    if (!formData.dia) {
+      Alert.alert('Error', 'La fecha es requerida (formato: YYYY-MM-DD)');
+      return false;
+    }
+    return true;
+  };
+
+  // Subir reporte
+  const handleSubirReporte = async () => {
+    if (!validarFormulario()) {
       return;
     }
-    
-    console.log('Subir reporte:', { nombre, descripcion, fecha, raza, imagen });
-    Alert.alert('Éxito', 'Reporte enviado correctamente');
+
+    setLoading(true);
+
+    try {
+      const mascotaData = {
+        nombre: formData.nombre.trim(),
+        raza: formData.raza.trim(),
+        descripcion: formData.descripcion.trim(),
+        dia: formData.dia, // Formato: YYYY-MM-DD
+        tipo_reporte: 'Pérdida', // O puedes agregar un selector
+      };
+
+      console.log('Enviando reporte:', mascotaData);
+      console.log('Con imagen:', imagen);
+
+      const result = await mascotasServices.crearMascota(mascotaData, imagen);
+
+      setLoading(false);
+
+      if (result.success) {
+        Alert.alert(
+          '¡Éxito!',
+          'Reporte de mascota perdida creado correctamente',
+          [
+            {
+              text: 'Ver lista',
+              onPress: () => navigation.navigate('Inicio'),
+            },
+          ]
+        );
+
+        // Limpiar formulario
+        setFormData({
+          nombre: '',
+          descripcion: '',
+          dia: '',
+          raza: '',
+        });
+        setImagen(null);
+      } else {
+        Alert.alert('Error', result.error || 'No se pudo crear el reporte');
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error al subir reporte:', error);
+      Alert.alert('Error', 'Ocurrió un error inesperado');
+    }
   };
 
   return (
@@ -43,12 +198,9 @@ const ReportarMascotaPerdidaScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation?.goBack()}
         >
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color="#0a0a0aff"
-          />
+          <Ionicons name="arrow-back" size={24} color="#0a0a0aff" />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Reportar Mascota Perdida</Text>
       </View>
 
       <ScrollView 
@@ -59,66 +211,92 @@ const ReportarMascotaPerdidaScreen = ({ navigation }) => {
         {/* Área de subir foto */}
         <TouchableOpacity 
           style={styles.uploadArea}
-          onPress={handleSeleccionarImagen}
+          onPress={handleOpcionesImagen}
           activeOpacity={0.7}
         >
           {imagen ? (
-            <Image source={{ uri: imagen }} style={styles.uploadedImage} />
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: imagen }} style={styles.uploadedImage} />
+              <TouchableOpacity
+                style={styles.removeImageButton}
+                onPress={() => setImagen(null)}
+              >
+                <Ionicons name="close-circle" size={30} color="#E74C3C" />
+              </TouchableOpacity>
+            </View>
           ) : (
             <View style={styles.uploadPlaceholder}>
-              <Text style={styles.uploadIcon}>⬆</Text>
+              <Ionicons name="camera" size={48} color="#5B9AAA" />
               <Text style={styles.uploadText}>Sube una foto de la mascota</Text>
+              <Text style={styles.uploadSubtext}>Toca para seleccionar</Text>
             </View>
           )}
         </TouchableOpacity>
 
         {/* Nombre de la mascota */}
-        <TextInput
-          style={styles.input}
-          placeholder="Nombre de la mascota"
-          placeholderTextColor="#999"
-          value={nombre}
-          onChangeText={setNombre}
-        />
-
-        {/* Descripción */}
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Descripción"
-          placeholderTextColor="#999"
-          value={descripcion}
-          onChangeText={setDescripcion}
-          multiline
-          numberOfLines={4}
-          textAlignVertical="top"
-        />
-
-        {/* Fecha */}
-        <TextInput
-          style={styles.input}
-          placeholder="mm/dd/yy"
-          placeholderTextColor="#999"
-          value={fecha}
-          onChangeText={setFecha}
-          keyboardType="numeric"
-        />
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Nombre *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Firulais"
+            placeholderTextColor="#999"
+            value={formData.nombre}
+            onChangeText={(value) => updateField('nombre', value)}
+          />
+        </View>
 
         {/* Raza */}
-        <TextInput
-          style={styles.input}
-          placeholder="Raza"
-          placeholderTextColor="#999"
-          value={raza}
-          onChangeText={setRaza}
-        />
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Raza *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Labrador"
+            placeholderTextColor="#999"
+            value={formData.raza}
+            onChangeText={(value) => updateField('raza', value)}
+          />
+        </View>
+
+        {/* Fecha */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Fecha de pérdida *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="YYYY-MM-DD (Ej: 2025-11-26)"
+            placeholderTextColor="#999"
+            value={formData.dia}
+            onChangeText={(value) => updateField('dia', value)}
+          />
+          <Text style={styles.helperText}>Formato: Año-Mes-Día</Text>
+        </View>
+
+        {/* Descripción */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Descripción *</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Describe características de tu mascota, dónde se perdió, etc."
+            placeholderTextColor="#999"
+            value={formData.descripcion}
+            onChangeText={(value) => updateField('descripcion', value)}
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+          />
+        </View>
 
         {/* Botón Subir reporte */}
         <TouchableOpacity 
-          style={styles.submitButton}
+          style={[styles.submitButton, loading && styles.submitButtonDisabled]}
           onPress={handleSubirReporte}
           activeOpacity={0.8}
+          disabled={loading}
         >
-          <Text style={styles.submitText}>Subir reporte</Text>
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.submitText}>Subir reporte</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -134,8 +312,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingTop: 50,
+    paddingBottom: 16,
     backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
   },
   backButton: {
     width: 40,
@@ -143,10 +324,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
-  },
-  backIcon: {
-    fontSize: 24,
-    color: '#333',
   },
   headerTitle: {
     fontSize: 18,
@@ -163,11 +340,11 @@ const styles = StyleSheet.create({
   uploadArea: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 40,
-    marginBottom: 16,
+    padding: 20,
+    marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 160,
+    minHeight: 200,
     borderWidth: 2,
     borderColor: '#E0E0E0',
     borderStyle: 'dashed',
@@ -175,35 +352,66 @@ const styles = StyleSheet.create({
   uploadPlaceholder: {
     alignItems: 'center',
   },
-  uploadIcon: {
-    fontSize: 48,
-    color: '#5B9AAA',
-    marginBottom: 8,
-  },
   uploadText: {
-    fontSize: 15,
+    fontSize: 16,
     color: '#5B9AAA',
-    fontWeight: '500',
+    fontWeight: '600',
+    marginTop: 12,
+  },
+  uploadSubtext: {
+    fontSize: 13,
+    color: '#999',
+    marginTop: 4,
+  },
+  imageContainer: {
+    width: '100%',
+    position: 'relative',
   },
   uploadedImage: {
     width: '100%',
-    height: 160,
+    height: 200,
     borderRadius: 12,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
   },
   input: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 15,
     color: '#333',
-    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#E0E0E0',
   },
   textArea: {
     height: 120,
-    paddingTop: 16,
+    paddingTop: 14,
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 4,
+    marginLeft: 4,
   },
   submitButton: {
     backgroundColor: '#7B6BA8',
@@ -219,49 +427,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  submitButtonDisabled: {
+    backgroundColor: '#B0B0B0',
+  },
   submitText: {
     fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
     textAlign: 'center',
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 8,
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  navItemActive: {
-    // Estado activo
-  },
-  navIcon: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  navLabel: {
-    fontSize: 11,
-    color: '#666',
-  },
-  navLabelActive: {
-    color: '#6BB5A4',
-    fontWeight: '600',
   },
 });
 

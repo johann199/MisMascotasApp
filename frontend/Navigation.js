@@ -11,6 +11,7 @@ import ReportarScreen from "./src/screens/ReportarScreen";
 import ReportarMascotaPerdidaScreen from "./src/screens/ReportarMascotaPerdidaScreen";
 import ReportarMascotaEncontradaScreen from "./src/screens/ReportarMascotaEncontradaScreen";
 import ServiciosScreen from "./src/screens/ServiciosScreen";
+import CreateServiceScreen from "./src/screens/CreateServiceScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -30,8 +31,21 @@ function ReportarStack() {
   );
 }
 
-// Tabs principales con iconos personalizados
-function TabsInferiores() {
+function ServiciosStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ServiciosHome" component={ServiciosScreen} />
+      <Stack.Screen 
+        name="CrearServicio" 
+        component={CreateServiceScreen}
+        options={{ title: "Nuevo Servicio" }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+
+export default function Navegacion({ onLogout }) {
   return (
     <Tab.Navigator
       initialRouteName="Inicio"
@@ -78,6 +92,7 @@ function TabsInferiores() {
       <Tab.Screen 
         name="Perfil" 
         component={PerfilScreen}
+        initialParams={{ onLogout }}
         options={{
           tabBarLabel: 'Perfil',
         }}
@@ -91,19 +106,11 @@ function TabsInferiores() {
       />
       <Tab.Screen 
         name="Servicios" 
-        component={ServiciosScreen}
+        component={ServiciosStack}
         options={{
           tabBarLabel: 'Servicios',
         }}
       />
     </Tab.Navigator>
-  );
-}
-
-export default function Navegacion() {
-  return (
-    <NavigationContainer>
-      <TabsInferiores />
-    </NavigationContainer>
   );
 }

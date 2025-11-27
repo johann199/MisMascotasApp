@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -6,27 +6,59 @@ import {
   StyleSheet, 
   TouchableOpacity, 
   ScrollView,
-  Image 
+  Image,
+  ActivityIndicator,
+  RefreshControl
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import mascotasServices from '../services/mascotasServices';
 
 const InicioScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('Inicio');
+  const [mascotas, setMascotas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
+  useEffect(() => {
+    cargarMascotas();
+  }, []);
 
-  // Datos de ejemplo
-  const mascotas = [
-    {
-      id: 1,
-      nombre: 'Ela',
-      descripcion: 'Aquí descripción',
-      estado: 'Perdido',
-      imagen: 'https://via.placeholder.com/300x200'
-    },
-    // Puedes agregar más mascotas aquí
-  ];
+  const cargarMascotas = async () => {
+    setLoading(true);
+    const result = await mascotasServices.obtenerMascotas();
+    
+    if (result.success) {
+      setMascotas(result.data);
+    } else {
+      console.error('Error cargando mascotas:', result.error);
+    }
+    setLoading(false);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await cargarMascotas();
+    setRefreshing(false);
+  };
+
+  // Filtrar mascotas según el tab seleccionado y búsqueda
+  const mascotasFiltradas = mascotas.filter(mascota => {
+    // Filtro por búsqueda
+    const matchSearch = mascota.nombre
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    
+    // Filtro por tab
+    let matchTab = true;
+    if (selectedTab === 'Perdidos') {
+      matchTab = mascota.tipo_reporte === 'Pérdida';
+    } else if (selectedTab === 'Encontrados') {
+      matchTab = mascota.tipo_reporte === 'Encontrada';
+    }
+    // 'Todos' y 'Raza' por ahora muestran todo
+    
+    return matchSearch && matchTab;
+  });
 
   return (
     <View style={styles.container}>
@@ -39,7 +71,10 @@ const InicioScreen = ({ navigation }) => {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <TouchableOpacity style={styles.profileButton}>
+        <TouchableOpacity 
+          style={styles.profileButton}
+          onPress={() => navigation.navigate('Perfil')}
+        >
           <Text style={styles.profileIcon}>👤</Text>
         </TouchableOpacity>
       </View>
@@ -65,18 +100,6 @@ const InicioScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[styles.tab, selectedTab === 'Raza' && styles.tabActive]}
-          onPress={() => setSelectedTab('Raza')}
-        >
-          <Text style={[styles.tabText, selectedTab === 'Raza' && styles.tabTextActive]}>
-            Raza
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Segunda fila de tabs */}
-      <View style={styles.tabsContainer}>
-        <TouchableOpacity 
           style={[styles.tab, selectedTab === 'Perdidos' && styles.tabActive]}
           onPress={() => setSelectedTab('Perdidos')}
         >
@@ -87,26 +110,79 @@ const InicioScreen = ({ navigation }) => {
       </View>
 
       {/* Lista de mascotas */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {mascotas.map((mascota) => (
-          <View key={mascota.id} style={styles.card}>
-            <Image 
-              source={{ uri: mascota.imagen }}
-              style={styles.cardImage}
-              resizeMode="cover"
+      {loading && mascotas.length === 0 ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#5BB5A2" />
+          <Text style={styles.loadingText}>Cargando mascotas...</Text>
+        </View>
+      ) : (
+        <ScrollView 
+          style={styles.content} 
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#5BB5A2']}
             />
-            <View style={styles.cardFooter}>
-              <View style={styles.cardInfo}>
-                <Text style={styles.cardTitle}>{mascota.nombre}</Text>
-                <Text style={styles.cardDescription}>{mascota.descripcion}</Text>
-              </View>
-              <View style={styles.estadoBadge}>
-                <Text style={styles.estadoText}>{mascota.estado}</Text>
-              </View>
+          }
+        >
+          {mascotasFiltradas.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>
+                {searchQuery 
+                  ? 'No se encontraron mascotas con ese nombre' 
+                  : 'No hay mascotas registradas'}
+              </Text>
             </View>
-          </View>
-        ))}
-      </ScrollView>
+          ) : (
+            mascotasFiltradas.map((mascota) => (
+              <TouchableOpacity 
+                key={mascota.id} 
+                style={styles.card}
+                onPress={() => navigation.navigate('DetalleMascota', { mascota })}
+                activeOpacity={0.7}
+              >
+                {mascota.imagen ? (
+                  <Image 
+                    source={{ uri: mascotasServices.getImageUrl(mascota.imagen) }}
+                    style={styles.cardImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={[styles.cardImage, styles.placeholderImage]}>
+                    <Text style={styles.placeholderText}>🐾</Text>
+                  </View>
+                )}
+                <View style={styles.cardFooter}>
+                  <View style={styles.cardInfo}>
+                    <Text style={styles.cardTitle}>{mascota.nombre}</Text>
+                    <Text style={styles.cardDescription}>
+                      {mascota.especie && mascota.raza 
+                        ? `${mascota.especie} • ${mascota.raza}` 
+                        : mascota.especie || mascota.raza || 'Sin información'}
+                    </Text>
+                    {mascota.edad && (
+                      <Text style={styles.cardAge}>{mascota.edad} años</Text>
+                    )}
+                  </View>
+                  <View style={[
+                    styles.estadoBadge,
+                    mascota.tipo_reporte === 'Encontrada' && styles.estadoBadgeEncontrada
+                  ]}>
+                    <Text style={[
+                      styles.estadoText,
+                      mascota.tipo_reporte === 'Encontrada' && styles.estadoTextEncontrada
+                    ]}>
+                      {mascota.tipo_reporte}
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -175,6 +251,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+    paddingHorizontal: 40,
+  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -194,6 +293,13 @@ const styles = StyleSheet.create({
     height: 280,
     backgroundColor: '#E0E0E0',
   },
+  placeholderImage: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 80,
+  },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -212,6 +318,11 @@ const styles = StyleSheet.create({
   cardDescription: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 2,
+  },
+  cardAge: {
+    fontSize: 13,
+    color: '#999',
   },
   estadoBadge: {
     backgroundColor: '#F5B7B1',
@@ -219,48 +330,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
   },
+  estadoBadgeEncontrada: {
+    backgroundColor: '#A9DFBF',
+  },
   estadoText: {
     fontSize: 13,
     color: '#C0392B',
     fontWeight: '600',
   },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 8,
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  navItemActive: {
-    // Estado activo
-  },
-  navIcon: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  navLabel: {
-    fontSize: 11,
-    color: '#666',
-  },
-  navLabelActive: {
-    color: '#5BB5A2',
-    fontWeight: '600',
+  estadoTextEncontrada: {
+    color: '#229954',
   },
 });
 

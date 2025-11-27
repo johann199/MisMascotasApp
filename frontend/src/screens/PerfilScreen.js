@@ -1,52 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
-  ImageBackground,
   Image,
-  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AuthService from '../services/authService';
 
 const PerfilScreen = ({ navigation }) => {
-    const [activeTab, setActiveTab] = useState('Inicio');
+  const [user, setUser] = useState(null);
+
+  // Cargar usuario al entrar a la pantalla
+  useEffect(() => {
+    const loadUser = async () => {
+      const storedUser = await AuthService.getUser();
+      setUser(storedUser);
+    };
+    loadUser();
+  }, []);
+
+  const handleLogout = async () => {
+    await AuthService.logout();
+    // App.js detectará el cambio gracias a subscribeAuth()
+  };
+
   return (
     <View style={styles.container}>
+      {/* HEADER */}
       <View style={styles.header}>
-        <View style={styles.patternBackground}>
-          {/* Aquí iría el patrón de gatos - por ahora color sólido */}
-        </View>
-        
-        {/* Avatar circular */}
+        <View style={styles.patternBackground} />
+
+        {/* AVATAR */}
         <View style={styles.avatarContainer}>
           <Image
-            source={{ uri: 'https://via.placeholder.com/120' }}
+            source={{
+              uri: user?.imagen_perfil || 'https://via.placeholder.com/120',
+            }}
             style={styles.avatar}
           />
         </View>
       </View>
 
-      {/* Saludo */}
-      <Text style={styles.greeting}>¡Hola, usuario!</Text>
+      {/* NOMBRE */}
+      <Text style={styles.greeting}>
+        ¡Hola, {user?.username || 'usuario'}!
+      </Text>
 
-      {/* Espaciador */}
+      {/* EMAIL */}
+      {user?.email && (
+        <Text style={styles.emailText}>{user.email}</Text>
+      )}
+
+      {/* CONTENIDO */}
       <View style={styles.content} />
+
+      {/* BOTÓN LOGOUT */}
+      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        <Ionicons name="log-out-outline" size={22} color="#fff" />
+        <Text style={styles.logoutText}>Cerrar sesión</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  header: {
-    alignItems: 'center',
-    paddingTop: 40,
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+
+  header: { alignItems: 'center', paddingTop: 40 },
+
   patternBackground: {
     width: '100%',
     height: 180,
@@ -54,84 +77,51 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
   },
+
   avatarContainer: {
     marginTop: 100,
     borderRadius: 60,
     overflow: 'hidden',
     borderWidth: 4,
     borderColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 5,
   },
-  avatar: {
-    width: 120,
-    height: 120,
-  },
+
+  avatar: { width: 120, height: 120 },
+
   greeting: {
     fontSize: 24,
     fontWeight: '600',
     textAlign: 'center',
     marginTop: 16,
-    color: '#333333',
+    color: '#333',
   },
-  content: {
-    flex: 1,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 8,
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  navItemActive: {
-    // Item activo
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F5F5F5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  iconContainerActive: {
-    backgroundColor: '#E8F4F1',
-  },
-  icon: {
-    fontSize: 24,
-  },
-  navLabel: {
-    fontSize: 12,
-    color: '#666666',
+
+  emailText: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
     marginTop: 4,
   },
-  navLabelActive: {
-    color: '#4A9B8E',
+
+  content: { flex: 1 },
+
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4A9B8E',
+    marginHorizontal: 40,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginBottom: 40,
+  },
+
+  logoutText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: '600',
+    marginLeft: 8,
   },
 });
 
