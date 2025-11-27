@@ -6,6 +6,8 @@ from .models import Mascota
 from ninja.errors import HttpError
 from django.db import IntegrityError, transaction
 from datetime import datetime
+from .embeddings import *
+import traceback
 
 mascotas = Router()
 
@@ -84,3 +86,81 @@ def eliminar_mascota(request, mascota_id: int):
     return {"detail": f"Mascota con ID {mascota_id} eliminada exitosamente"}
 
 
+@mascotas.get("/match/{mascota_id}", tags=["Mascotas"])
+def match_mascota(request, mascota_id: int):
+    print("=" * 50)
+    print(f"Buscando matches para mascota ID: {mascota_id}")
+    
+    try:
+        mascota = get_object_or_404(Mascota, id=mascota_id)
+        print(f"✅ Mascota encontrada: {mascota.nombre}")
+        print(f"Tipo reporte: {mascota.tipo_reporte}")
+        print(f"Tiene imagen: {bool(mascota.imagen)}")
+        
+        if mascota.tipo_reporte != "Pérdida":
+            print(f"❌ Error: Mascota es de tipo '{mascota.tipo_reporte}', no 'Pérdida'")
+            raise HttpError(400, "Solo se pueden comparar mascotas PERDIDAS")
+
+        if not mascota.imagen:
+            print("❌ Error: La mascota no tiene imagen")
+            raise HttpError(400, "La mascota no tiene imagen registrada")
+
+        # Ruta completa de la imagen
+        imagen_path = mascota.imagen.path
+        print(f"Ruta de imagen: {imagen_path}")
+        
+        # Verificar que el archivo existe
+        import os
+        if not os.path.exists(imagen_path):
+            print(f"❌ Error: Archivo no existe en {imagen_path}")
+            raise HttpError(400, "El archivo de imagen no existe en el servidor")
+        
+        print("Generando embedding de mascota perdida...")
+        perdida_emb = generate_embedding(imagen_path)
+        print(f"✅ Embedding generado. Shape: {perdida_emb.shape}")
+
+        resultados = []
+        encontradas = Mascota.objects.filter(tipo_reporte="Encontrada")
+        print(f"Total de mascotas encontradas: {encontradas.count()}")
+
+        for encontrada in encontradas:
+            if not encontrada.imagen:
+                print(f"⚠️ Mascota {encontrada.nombre} no tiene imagen, omitiendo...")
+                continue
+
+            encontrada_path = encontrada.imagen.path
+            print(f"Procesando: {encontrada.nombre} - {encontrada_path}")
+            
+            if not os.path.exists(encontrada_path):
+                print(f"⚠️ Archivo no existe: {encontrada_path}")
+                continue
+
+            try:
+                encontrada_emb = generate_embedding(encontrada_path)
+                similarity = float(cosine_similarity(perdida_emb, encontrada_emb))
+                print(f"Similitud con {encontrada.nombre}: {similarity:.3f}")
+
+                if similarity >= 0.65:
+                    resultados.append({
+                        "id": encontrada.id,
+                        "nombre": encontrada.nombre,
+                        "descripcion": encontrada.descripcion,
+                        "imagen": encontrada.imagen.url,
+                        "similitud": round(similarity, 3)
+                    })
+            except Exception as e:
+                print(f"❌ Error procesando {encontrada.nombre}: {str(e)}")
+                continue
+
+        resultados = sorted(resultados, key=lambda x: -x["similitud"])
+        print(f"✅ Matches encontrados: {len(resultados)}")
+        print("=" * 50)
+
+        return {"matches": resultados}
+    
+    except HttpError:
+        raise
+    except Exception as e:
+        print(f"❌ Error inesperado: {str(e)}")
+        print(traceback.format_exc())
+        raise HttpError(500, f"Error procesando matches: {str(e)}")

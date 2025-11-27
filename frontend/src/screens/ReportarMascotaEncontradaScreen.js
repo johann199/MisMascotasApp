@@ -136,6 +136,7 @@ const ReportarMascotaEncontradaScreen = ({ navigation }) => {
         Alert.alert("¡Éxito!", "Reporte de mascota encontrada enviado.", [
           { text: "Volver", onPress: () => navigation.navigate("Inicio") },
         ]);
+        navigation.navigate("MatchScreen", { mascotaId: result.data.id });
 
         setFormData({ nombre: "", descripcion: "", dia: "", raza: "" });
         setImagen(null);

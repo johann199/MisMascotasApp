@@ -12,11 +12,11 @@ import ReportarMascotaPerdidaScreen from "./src/screens/ReportarMascotaPerdidaSc
 import ReportarMascotaEncontradaScreen from "./src/screens/ReportarMascotaEncontradaScreen";
 import ServiciosScreen from "./src/screens/ServiciosScreen";
 import CreateServiceScreen from "./src/screens/CreateServiceScreen";
-
+import MatchScreen from "./src/screens/MatchScreen";
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Stack Navigator para Reportar
+
 function ReportarStack() {
   return (
     <Stack.Navigator
@@ -27,6 +27,7 @@ function ReportarStack() {
         <Stack.Screen name="ReportarMenu" component={ReportarScreen} />
         <Stack.Screen name="ReportarPerdida" component={ReportarMascotaPerdidaScreen} />
         <Stack.Screen name="ReportarEncontrada" component={ReportarMascotaEncontradaScreen} />
+        <Stack.Screen name="MatchScreen" component={MatchScreen} />
     </Stack.Navigator>
   );
 }

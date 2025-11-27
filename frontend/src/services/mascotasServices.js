@@ -69,6 +69,15 @@ class MascotasService {
       : 'https://mismascotasApp.com';
     return `${baseUrl}${imagePath}`;
   }
+  async buscarMatch(mascotaId) {
+    try {
+      const result = await mascotasAPI.match(mascotaId);
+      return result;
+    } catch (error) {
+      console.error("Error obteniendo match:", error);
+      return { success: false, error: "Error al obtener coincidencias" };
+    }
+  }
 }
 
 export default new MascotasService();

@@ -203,6 +203,19 @@ export const mascotasAPI = {
       };
     }
   },
+
+  match: async (mascotaId) => {
+    try {
+      const response = await apiClient.get(`/mascotas/match/${mascotaId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.detail || "Error al buscar coincidencias"
+      };
+    }
+  },
+  
 };
 
 export const serviciosAPI = {
