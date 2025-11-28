@@ -1,49 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { 
-  View, 
-  Text, 
-  TextInput,
-  StyleSheet, 
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
-  Image,
-  Linking
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+  View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView,
+  Image, Linking
+} from "react-native";
+import serviciosServices from "../services/serviciosServices";
 
 const ServiciosScreen = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('Inicio');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [servicios, setServicios] = useState([]);
 
-  // Datos de ejemplo de servicios
-  const servicios = [
-    {
-      id: 1,
-      nombre: 'Milenzo PetShop',
-      descripcion: 'Aquí descripción',
-      telefono: '309 224 3194',
-      whatsapp: '318 9404033',
-      imagen: 'https://via.placeholder.com/300x200',
-      caracteristicas: [
-        { icono: '👑', texto: 'Exclusividad' },
-        { icono: '⭐', texto: 'La mejor calidad' },
-        { icono: '✖️', texto: 'Productos totalmente rigorizados en el bienestar de tus mascota' }
-      ]
-    },
-    // Puedes agregar más servicios aquí
-  ];
+  useEffect(() => {
+    cargarServicios();
+  }, []);
 
-  const handleLlamar = (telefono) => {
-    Linking.openURL(`tel:${telefono.replace(/\s/g, '')}`);
+  const cargarServicios = async () => {
+    try {
+      const data = await serviciosServices.listar();
+      setServicios(data);
+    } catch (error) {
+      console.log("Error listando servicios:", error);
+    }
   };
 
-  const handleWhatsApp = (numero) => {
-    Linking.openURL(`whatsapp://send?phone=${numero.replace(/\s/g, '')}`);
+  const handleLlamar = (telefono) => {
+    Linking.openURL(`tel:${telefono}`);
   };
 
   return (
     <View style={styles.container}>
+      
       {/* Buscador */}
       <View style={styles.searchContainer}>
         <TextInput
@@ -53,82 +38,41 @@ const ServiciosScreen = ({ navigation }) => {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => navigation.navigate("CrearServicio")}
+        >
           <Text style={styles.addIcon}>+</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Lista de servicios */}
-      <ScrollView 
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}
-      >
-        {servicios.map((servicio) => (
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        
+        {servicios.map(servicio => (
           <View key={servicio.id} style={styles.card}>
-            {/* Banner con imagen */}
-            <View style={styles.banner}>
-              <View style={styles.bannerContent}>
-                <Text style={styles.bannerTitle}>AMAMOS{'\n'}CUIDAR A TUS{'\n'}MASCOTAS</Text>
-                
-                <View style={styles.badgeContainer}>
-                  <View style={styles.logoBadge}>
-                    <Text style={styles.logoIcon}>🐕</Text>
-                    <Text style={styles.logoText}>Milenzo{'\n'}PetShop</Text>
-                  </View>
-                </View>
 
-                <Image 
-                  source={{ uri: servicio.imagen }}
-                  style={styles.bannerImage}
-                  resizeMode="cover"
-                />
-              </View>
+            {/* IMAGEN */}
+            {servicio.imagen && (
+              <Image source={{ uri: servicio.imagen }} style={styles.bannerImage} />
+            )}
 
-              {/* Características */}
-              <View style={styles.features}>
-                {servicio.caracteristicas.map((feature, index) => (
-                  <View key={index} style={styles.featureItem}>
-                    <Text style={styles.featureIcon}>{feature.icono}</Text>
-                    <Text style={styles.featureText}>{feature.texto}</Text>
-                  </View>
-                ))}
-
-                {/* WhatsApp */}
-                <TouchableOpacity 
-                  style={styles.whatsappButton}
-                  onPress={() => handleWhatsApp(servicio.whatsapp)}
-                >
-                  <Text style={styles.whatsappIcon}>💬</Text>
-                  <Text style={styles.whatsappText}>{servicio.whatsapp}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Footer de la card */}
             <View style={styles.cardFooter}>
               <View style={styles.cardInfo}>
                 <Text style={styles.cardTitle}>{servicio.nombre}</Text>
                 <Text style={styles.cardDescription}>{servicio.descripcion}</Text>
               </View>
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.phoneButton}
                 onPress={() => handleLlamar(servicio.telefono)}
               >
                 <Text style={styles.phoneText}>{servicio.telefono}</Text>
               </TouchableOpacity>
             </View>
+
           </View>
         ))}
 
-        {/* Banner Purina */}
-        <View style={styles.purinaBanner}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/300x80' }}
-            style={styles.purinaLogo}
-            resizeMode="contain"
-          />
-        </View>
       </ScrollView>
     </View>
   );
@@ -236,12 +180,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   bannerImage: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 150,
+    width: "100%",
     height: 180,
-    zIndex: 1,
+    resizeMode: "cover",
   },
   features: {
     backgroundColor: '#6B2DBF',
