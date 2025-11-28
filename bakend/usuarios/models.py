@@ -6,10 +6,11 @@ class User (AbstractUser):
     creado = models.DateTimeField(auto_now_add=True)
     modificado = models.DateTimeField(auto_now=True)
     edad = models.BigIntegerField(null=True, blank=True)
+    password = models.CharField("Contraseña", max_length=128)
     correo_verificado = models.BooleanField("¿Correo Verificado?", default=False)
     imagen_perfil = models.URLField("imagen de perfil", max_length=500, blank=True, null=True, help_text='Url del perfil')
     biografia = models.TextField("Biografia", max_length=300, blank=True, null= True)
-    telefono = models.BigIntegerField("Teléfono")
+    telefono = models.BigIntegerField("Teléfono", null=True, blank=True)
     firebase_uid = models.CharField('Firebase UID',max_length=128, unique=True,blank=True,null=True, help_text='UID único de Firebase para usuarios de Google')
     auth_proveedor = models.CharField("Proveedor de autentificaión", max_length=20, choices=[('email', 'Email/Password'), ('google', 'Google'),], default='email')
 
