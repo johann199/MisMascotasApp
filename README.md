@@ -94,3 +94,27 @@ El proyecto utilizará GitFlow para organizar el desarrollo de manera eficiente:
 NGROK_URL="ir a la url de ngrok para la url, aquí si debe ir con http"
 
 Url de ngrok: https://ngrok.com/
+
+## Tests
+
+### Backend
+**Ejecutar todos los tests:**
+```bash
+cd bakend
+.venv\Scripts\activate
+python -m unittest discover -s . -p "tests.py" -v
+```
+
+**Ejecutar tests de un módulo específico:**
+```bash
+# Tests de servicios
+python -m unittest servicios.tests -v
+
+# Tests de mascotas
+python -m unittest mascotas.tests -v
+```
+### Frontend
+```bash
+cd frontend
+npm test
+```
