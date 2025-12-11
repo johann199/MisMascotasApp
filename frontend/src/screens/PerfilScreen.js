@@ -16,8 +16,6 @@ const PerfilScreen = ({ navigation }) => {
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = await AuthService.getUser();
-      console.log('Usuario completo:', storedUser);
-      console.log('Teléfono específico:', storedUser?.telefono); 
       setUser(storedUser);
     };
     loadUser();

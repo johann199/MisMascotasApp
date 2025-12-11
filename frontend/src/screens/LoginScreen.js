@@ -72,11 +72,6 @@ export default function LoginScreen({ navigation }) {
 
       if (result.success) {
         console.log('Login exitoso');
-
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Inicio' }],
-        });
       } else {
         Alert.alert('Error de inicio de sesión', result.error || 'Credenciales incorrectas');
       }
