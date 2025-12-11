@@ -11,6 +11,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AuthService  from '../services/authService';
@@ -21,23 +22,22 @@ const ComeBackLogo = ({ size = 'small' }) => {
   
   return (
     <View style={[styles.logoCircle, { 
-      width: 140 * scale, 
-      height: 140 * scale,
-      borderRadius: 70 * scale 
-    }]}>
-      <View style={styles.logoHouse}>
-        <View style={styles.logoRoof} />
-        <View style={styles.logoBody}>
-          <View style={styles.logoDog}>
-            <View style={[styles.dogEye, { left: 8 }]} />
-            <View style={[styles.dogEye, { right: 8 }]} />
-            <View style={styles.dogNose} />
-            <View style={styles.dogMouth} />
-          </View>
+          width: 140 * scale, 
+          height: 140 * scale,
+          borderRadius: 70 * scale,
+          overflow: 'hidden',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }]}>
+          <Image 
+            source={require('../../assets/img/splash.png')}
+            style={{
+              width: '90%',
+              height: '90%',
+              resizeMode: 'cover'
+            }}
+          />
         </View>
-      </View>
-      <Text style={[styles.logoText, { fontSize: 16 * scale }]}>COME HOME</Text>
-    </View>
   );
 };
 
@@ -595,13 +595,13 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   registerButton: {
-    backgroundColor: '#7B68EE',
+    backgroundColor: '#03045E',
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
     marginTop: 20,
     marginBottom: 15,
-    shadowColor: '#7B68EE',
+    shadowColor: '#03045E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -626,7 +626,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   loginLink: {
-    color: '#7B68EE',
+    color: '#03045E',
     fontSize: 14,
     fontWeight: '600',
   },

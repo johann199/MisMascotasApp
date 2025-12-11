@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import mascotasServices from '../services/mascotasServices';
 
 const InicioScreen = ({ navigation }) => {
@@ -43,19 +44,16 @@ const InicioScreen = ({ navigation }) => {
 
   // Filtrar mascotas según el tab seleccionado y búsqueda
   const mascotasFiltradas = mascotas.filter(mascota => {
-    // Filtro por búsqueda
     const matchSearch = mascota.nombre
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     
-    // Filtro por tab
     let matchTab = true;
     if (selectedTab === 'Perdidos') {
       matchTab = mascota.tipo_reporte === 'Pérdida';
     } else if (selectedTab === 'Encontrados') {
       matchTab = mascota.tipo_reporte === 'Encontrada';
     }
-    // 'Todos' y 'Raza' por ahora muestran todo
     
     return matchSearch && matchTab;
   });
@@ -112,7 +110,7 @@ const InicioScreen = ({ navigation }) => {
       {/* Lista de mascotas */}
       {loading && mascotas.length === 0 ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#5BB5A2" />
+          <ActivityIndicator size="large" color="#90E0EF" />
           <Text style={styles.loadingText}>Cargando mascotas...</Text>
         </View>
       ) : (
@@ -123,7 +121,7 @@ const InicioScreen = ({ navigation }) => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={['#5BB5A2']}
+              colors={['#90E0EF']}
             />
           }
         >
@@ -137,35 +135,37 @@ const InicioScreen = ({ navigation }) => {
             </View>
           ) : (
             mascotasFiltradas.map((mascota) => (
-              <TouchableOpacity 
-                key={mascota.id} 
-                style={styles.card}
-                onPress={() => navigation.navigate('DetalleMascota', { mascota })}
-                activeOpacity={0.7}
-              >
-                {mascota.imagen ? (
-                  <Image 
-                    source={{ uri: mascotasServices.getImageUrl(mascota.imagen) }}
-                    style={styles.cardImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={[styles.cardImage, styles.placeholderImage]}>
-                    <Text style={styles.placeholderText}>🐾</Text>
-                  </View>
-                )}
+              <View key={mascota.id} style={styles.card}>
+                {/* Imagen clickeable para ver detalle */}
+                <TouchableOpacity 
+                  onPress={() => navigation.navigate('DetalleMascota', { mascota })}
+                  activeOpacity={0.9}
+                >
+                  {mascota.imagen ? (
+                    <Image 
+                      source={{ uri: mascotasServices.getImageUrl(mascota.imagen) }}
+                      style={styles.cardImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.cardImage, styles.placeholderImage]}>
+                      <Text style={styles.placeholderText}>🐾</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                {/* Footer con información y botones */}
                 <View style={styles.cardFooter}>
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardTitle}>{mascota.nombre}</Text>
                     <Text style={styles.cardDescription}>
-                      {mascota.especie && mascota.raza 
-                        ? `${mascota.especie} • ${mascota.raza}` 
-                        : mascota.especie || mascota.raza || 'Sin información'}
+                      {mascota.raza || 'Sin información de raza'}
                     </Text>
                     {mascota.edad && (
                       <Text style={styles.cardAge}>{mascota.edad} años</Text>
                     )}
                   </View>
+                  
                   <View style={[
                     styles.estadoBadge,
                     mascota.tipo_reporte === 'Encontrada' && styles.estadoBadgeEncontrada
@@ -178,7 +178,22 @@ const InicioScreen = ({ navigation }) => {
                     </Text>
                   </View>
                 </View>
-              </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.matchButton}
+                  onPress={() => {
+                    console.log('Navegando a Match con ID:', mascota.id);
+                    navigation.navigate('MatchScreen', {
+                      mascotaId: mascota.id,
+                      mascotaNombre: mascota.nombre
+                    });
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="search" size={18} color="#FFF" />
+                  <Text style={styles.matchButtonText}>Buscar coincidencias</Text>
+                </TouchableOpacity>
+              </View>
             ))
           )}
         </ScrollView>
@@ -190,7 +205,7 @@ const InicioScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#ffff',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -198,7 +213,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#00B4D8',
   },
   searchInput: {
     flex: 1,
@@ -235,7 +250,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   tabActive: {
-    backgroundColor: '#5BB5A2',
+    backgroundColor: '#90E0EF',
   },
   tabText: {
     fontSize: 14,
@@ -305,6 +320,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
+    paddingBottom: 12,
   },
   cardInfo: {
     flex: 1,
@@ -325,21 +341,46 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   estadoBadge: {
-    backgroundColor: '#F5B7B1',
+    backgroundColor: '#FF9500',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
   estadoBadgeEncontrada: {
-    backgroundColor: '#A9DFBF',
+    backgroundColor: '#FFD60A',
   },
   estadoText: {
     fontSize: 13,
-    color: '#C0392B',
+    color: '#751E1E',
     fontWeight: '600',
   },
   estadoTextEncontrada: {
-    color: '#229954',
+    color: '#1E5175',
+  },
+
+  matchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#03045E',
+    marginHorizontal: 16,
+    marginBottom: 16,
+    paddingVertical: 12,
+    borderRadius: 10,
+    shadowColor: '#03045E',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  matchButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginLeft: 8,
   },
 });
 

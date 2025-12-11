@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from "@react-native-community/datetimepicker";
 import mascotasServices from '../services/mascotasServices';
 
 const ReportarMascotaPerdidaScreen = ({ navigation }) => {
@@ -24,6 +25,8 @@ const ReportarMascotaPerdidaScreen = ({ navigation }) => {
   
   const [imagen, setImagen] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [fecha, setFecha] = useState(new Date());
 
   // Actualizar campos individuales
   const updateField = (field, value) => {
@@ -49,7 +52,7 @@ const ReportarMascotaPerdidaScreen = ({ navigation }) => {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [4, 3],
-        quality: 0.8, // Compresión para reducir tamaño
+        quality: 0.8,
       });
 
       if (!result.canceled && result.assets[0]) {
@@ -136,7 +139,6 @@ const ReportarMascotaPerdidaScreen = ({ navigation }) => {
     return true;
   };
 
-  // Subir reporte
   const handleSubirReporte = async () => {
     if (!validarFormulario()) {
       return;
@@ -149,12 +151,9 @@ const ReportarMascotaPerdidaScreen = ({ navigation }) => {
         nombre: formData.nombre.trim(),
         raza: formData.raza.trim(),
         descripcion: formData.descripcion.trim(),
-        dia: formData.dia, // Formato: YYYY-MM-DD
-        tipo_reporte: 'Pérdida', // O puedes agregar un selector
+        dia: formData.dia,
+        tipo_reporte: 'Pérdida',
       };
-
-      console.log('Enviando reporte:', mascotaData);
-      console.log('Con imagen:', imagen);
 
       const result = await mascotasServices.crearMascota(mascotaData, imagen);
 
@@ -171,8 +170,6 @@ const ReportarMascotaPerdidaScreen = ({ navigation }) => {
             },
           ]
         );
-
-        // Limpiar formulario
         setFormData({
           nombre: '',
           descripcion: '',
@@ -260,13 +257,32 @@ const ReportarMascotaPerdidaScreen = ({ navigation }) => {
         {/* Fecha */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Fecha de pérdida *</Text>
-          <TextInput
+          <TouchableOpacity
             style={styles.input}
-            placeholder="YYYY-MM-DD (Ej: 2025-11-26)"
-            placeholderTextColor="#999"
-            value={formData.dia}
-            onChangeText={(value) => updateField('dia', value)}
-          />
+            onPress={() => setShowPicker(true)}
+          >
+            <Text style={{ color: '#333' }}>
+              {fecha.toISOString().split('T')[0]}
+            </Text>
+          </TouchableOpacity>
+
+          {showPicker && (
+            <DateTimePicker
+              value={fecha}
+              mode="date"
+              display="calendar"
+              onChange={(event, selectedDate) => {
+                setShowPicker(false);
+                if (selectedDate) {
+                  setFecha(selectedDate);
+                  setFormData({
+                    ...formData,
+                    dia: selectedDate.toISOString().split('T')[0],
+                  });
+                }
+              }}
+            />
+          )}
           <Text style={styles.helperText}>Formato: Año-Mes-Día</Text>
         </View>
 
@@ -414,7 +430,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   submitButton: {
-    backgroundColor: '#7B6BA8',
+    backgroundColor: '#03045E',
     paddingVertical: 18,
     borderRadius: 12,
     marginTop: 8,

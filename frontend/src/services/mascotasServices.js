@@ -71,10 +71,12 @@ class MascotasService {
   }
   async buscarMatch(mascotaId) {
     try {
+      console.log('Service: Buscando match para ID:', mascotaId);
       const result = await mascotasAPI.match(mascotaId);
+      console.log('Service: Resultado recibido:', result);
       return result;
     } catch (error) {
-      console.error("Error obteniendo match:", error);
+      console.error("Service: Error obteniendo match:", error);
       return { success: false, error: "Error al obtener coincidencias" };
     }
   }

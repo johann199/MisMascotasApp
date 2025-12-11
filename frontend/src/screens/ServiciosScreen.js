@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#00B4D8',
   },
   searchInput: {
     flex: 1,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#B8D4D1',
+    backgroundColor: '#D9D9D9',
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 12,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   banner: {
-    backgroundColor: '#6B2DBF',
+    backgroundColor: '#751E1E',
     overflow: 'hidden',
   },
   bannerContent: {
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   features: {
-    backgroundColor: '#6B2DBF',
+    backgroundColor: '#03045E',
     paddingHorizontal: 20,
     paddingBottom: 16,
   },
@@ -243,14 +243,14 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   phoneButton: {
-    backgroundColor: '#B8A7D6',
+    backgroundColor: '#CAF0F8',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
   },
   phoneText: {
     fontSize: 13,
-    color: '#5B2D91',
+    color: '#751E1E',
     fontWeight: '700',
   },
   purinaBanner: {

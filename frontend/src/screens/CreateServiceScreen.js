@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   saveButton: {
-    backgroundColor: "#6BB5A4",
+    backgroundColor: "#03045E",
     paddingVertical: 14,
     borderRadius: 12,
     justifyContent: "center",
