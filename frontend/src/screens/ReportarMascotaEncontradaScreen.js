@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from "@react-native-community/datetimepicker";
 import mascotasServices from '../services/mascotasServices';
 
 const ReportarMascotaEncontradaScreen = ({ navigation }) => {
@@ -24,6 +25,8 @@ const ReportarMascotaEncontradaScreen = ({ navigation }) => {
   
   const [imagen, setImagen] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [fecha, setFecha] = useState(new Date());
 
   // Actualizar campos individuales
   const updateField = (field, value) => {
@@ -52,6 +55,7 @@ const ReportarMascotaEncontradaScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error("Error al seleccionar imagen:", error);
+      Alert.alert('Error', 'No se pudo seleccionar la imagen');
     }
   };
 
@@ -127,8 +131,6 @@ const ReportarMascotaEncontradaScreen = ({ navigation }) => {
         tipo_reporte: "Encontrada",
       };
 
-      console.log("Enviando reporte encontrada:", datos, imagen);
-
       const result = await mascotasServices.crearMascota(datos, imagen);
       setLoading(false);
 
@@ -169,28 +171,29 @@ const ReportarMascotaEncontradaScreen = ({ navigation }) => {
         contentContainerStyle={styles.contentContainer}
       >
         {/* IMAGEN */}
-        <TouchableOpacity 
-          style={styles.uploadArea}
-          onPress={handleOpcionesImagen}
-        >
-          {imagen ? (
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: imagen }} style={styles.uploadedImage} />
-              <TouchableOpacity
-                style={styles.removeImageButton}
-                onPress={() => setImagen(null)}
-              >
-                <Ionicons name="close-circle" size={30} color="#E74C3C" />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.uploadPlaceholder}>
-              <Ionicons name="camera" size={48} color="#5B9AAA" />
-              <Text style={styles.uploadText}>Sube una foto de la mascota</Text>
-              <Text style={styles.uploadSubtext}>Toca para seleccionar</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+         <TouchableOpacity 
+            style={styles.uploadArea}
+            onPress={handleOpcionesImagen}
+            activeOpacity={0.7}
+          >
+            {imagen ? (
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: imagen }} style={styles.uploadedImage} />
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={() => setImagen(null)}
+                >
+                  <Ionicons name="close-circle" size={30} color="#E74C3C" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.uploadPlaceholder}>
+                <Ionicons name="camera" size={48} color="#5B9AAA" />
+                <Text style={styles.uploadText}>Sube una foto de la mascota</Text>
+                <Text style={styles.uploadSubtext}>Toca para seleccionar</Text>
+              </View>
+            )}
+         </TouchableOpacity>
 
         {/* CAMPOS */}
         <View style={styles.inputGroup}>
@@ -216,14 +219,33 @@ const ReportarMascotaEncontradaScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Fecha encontrada *</Text>
-          <TextInput
+          <Text style={styles.label}>Fecha de pérdida *</Text>
+          <TouchableOpacity
             style={styles.input}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#999"
-            value={formData.dia}
-            onChangeText={(v) => updateField("dia", v)}
-          />
+            onPress={() => setShowPicker(true)}
+          >
+            <Text style={{ color: '#333' }}>
+              {fecha.toISOString().split('T')[0]}
+            </Text>
+          </TouchableOpacity>
+
+          {showPicker && (
+            <DateTimePicker
+              value={fecha}
+              mode="date"
+              display="calendar"
+              onChange={(event, selectedDate) => {
+                setShowPicker(false);
+                if (selectedDate) {
+                  setFecha(selectedDate);
+                  setFormData({
+                    ...formData,
+                    dia: selectedDate.toISOString().split('T')[0],
+                  });
+                }
+              }}
+            />
+          )}
           <Text style={styles.helperText}>Formato: Año-Mes-Día</Text>
         </View>
 
@@ -316,7 +338,7 @@ const styles = StyleSheet.create({
   },
   uploadedImage: {
     width: '100%',
-    height: 160,
+    height: 200,
     borderRadius: 12,
   },
   input: {

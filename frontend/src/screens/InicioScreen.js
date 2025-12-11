@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import mascotasServices from '../services/mascotasServices';
 
 const InicioScreen = ({ navigation }) => {
@@ -43,19 +44,16 @@ const InicioScreen = ({ navigation }) => {
 
   // Filtrar mascotas según el tab seleccionado y búsqueda
   const mascotasFiltradas = mascotas.filter(mascota => {
-    // Filtro por búsqueda
     const matchSearch = mascota.nombre
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     
-    // Filtro por tab
     let matchTab = true;
     if (selectedTab === 'Perdidos') {
       matchTab = mascota.tipo_reporte === 'Pérdida';
     } else if (selectedTab === 'Encontrados') {
       matchTab = mascota.tipo_reporte === 'Encontrada';
     }
-    // 'Todos' y 'Raza' por ahora muestran todo
     
     return matchSearch && matchTab;
   });
@@ -137,35 +135,37 @@ const InicioScreen = ({ navigation }) => {
             </View>
           ) : (
             mascotasFiltradas.map((mascota) => (
-              <TouchableOpacity 
-                key={mascota.id} 
-                style={styles.card}
-                onPress={() => navigation.navigate('DetalleMascota', { mascota })}
-                activeOpacity={0.7}
-              >
-                {mascota.imagen ? (
-                  <Image 
-                    source={{ uri: mascotasServices.getImageUrl(mascota.imagen) }}
-                    style={styles.cardImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={[styles.cardImage, styles.placeholderImage]}>
-                    <Text style={styles.placeholderText}>🐾</Text>
-                  </View>
-                )}
+              <View key={mascota.id} style={styles.card}>
+                {/* Imagen clickeable para ver detalle */}
+                <TouchableOpacity 
+                  onPress={() => navigation.navigate('DetalleMascota', { mascota })}
+                  activeOpacity={0.9}
+                >
+                  {mascota.imagen ? (
+                    <Image 
+                      source={{ uri: mascotasServices.getImageUrl(mascota.imagen) }}
+                      style={styles.cardImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.cardImage, styles.placeholderImage]}>
+                      <Text style={styles.placeholderText}>🐾</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                {/* Footer con información y botones */}
                 <View style={styles.cardFooter}>
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardTitle}>{mascota.nombre}</Text>
                     <Text style={styles.cardDescription}>
-                      {mascota.especie && mascota.raza 
-                        ? `${mascota.especie} • ${mascota.raza}` 
-                        : mascota.especie || mascota.raza || 'Sin información'}
+                      {mascota.raza || 'Sin información de raza'}
                     </Text>
                     {mascota.edad && (
                       <Text style={styles.cardAge}>{mascota.edad} años</Text>
                     )}
                   </View>
+                  
                   <View style={[
                     styles.estadoBadge,
                     mascota.tipo_reporte === 'Encontrada' && styles.estadoBadgeEncontrada
@@ -178,7 +178,23 @@ const InicioScreen = ({ navigation }) => {
                     </Text>
                   </View>
                 </View>
-              </TouchableOpacity>
+
+                {/* ✅ Botón de búsqueda de coincidencias */}
+                <TouchableOpacity
+                  style={styles.matchButton}
+                  onPress={() => {
+                    console.log('Navegando a Match con ID:', mascota.id);
+                    navigation.navigate('MatchScreen', {
+                      mascotaId: mascota.id,
+                      mascotaNombre: mascota.nombre
+                    });
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="search" size={18} color="#FFF" />
+                  <Text style={styles.matchButtonText}>Buscar coincidencias</Text>
+                </TouchableOpacity>
+              </View>
             ))
           )}
         </ScrollView>
@@ -305,6 +321,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
+    paddingBottom: 12,
   },
   cardInfo: {
     flex: 1,
@@ -340,6 +357,31 @@ const styles = StyleSheet.create({
   },
   estadoTextEncontrada: {
     color: '#229954',
+  },
+  // ✅ Estilos del botón de match
+  matchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#7B6BA8',
+    marginHorizontal: 16,
+    marginBottom: 16,
+    paddingVertical: 12,
+    borderRadius: 10,
+    shadowColor: '#7B6BA8',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  matchButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginLeft: 8,
   },
 });
 
