@@ -27,9 +27,6 @@ export default function App() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState(null);
 
-  /* ====================================================
-     VERIFICAR CONEXIÓN CON EL BACKEND
-  ==================================================== */
   const testConnection = async () => {
     setConnectionStatus('checking');
     setError(null);
@@ -44,18 +41,12 @@ export default function App() {
     }
   };
 
-  /* ====================================================
-     VERIFICAR SI EXISTE TOKEN GUARDADO
-  ==================================================== */
   const checkAuthStatus = async () => {
     const hasToken = await AuthService.isAuthenticated();
     setIsAuthenticated(hasToken);
     setIsCheckingAuth(false);
   };
 
-  /* ====================================================
-     LISTENER: cuando se hace login o logout
-  ==================================================== */
   useEffect(() => {
     const unsubscribe = AuthService.subscribeAuth((authState) => {
       setIsAuthenticated(authState);
@@ -72,12 +63,11 @@ export default function App() {
     initialize();
   }, []);
 
-  /* ==================== UI ==================== */
 
   if (connectionStatus === 'checking') {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#7B68EE" />
+        <ActivityIndicator size="large" color="#03045E" />
         <Text style={styles.text}>Conectando con el servidor...</Text>
       </View>
     );
@@ -86,7 +76,7 @@ export default function App() {
   if (connectionStatus === 'error') {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>❌ Error de conexión</Text>
+        <Text style={styles.errorText}>Error de conexión</Text>
         <Text style={styles.errorDetail}>{error}</Text>
         <Button title="Reintentar" onPress={testConnection} />
       </View>
@@ -96,15 +86,13 @@ export default function App() {
   if (isCheckingAuth) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#7B68EE" />
+        <ActivityIndicator size="large" color="#03045E" />
         <Text style={styles.text}>Verificando sesión...</Text>
       </View>
     );
   }
 
-  /* ====================================================
-     NAVEGACIÓN PRINCIPAL
-  ==================================================== */
+
   return (
     <NavigationContainer>
       {isAuthenticated ? (
@@ -116,7 +104,6 @@ export default function App() {
   );
 }
 
-/* ==================== ESTILOS ==================== */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

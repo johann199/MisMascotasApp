@@ -2,6 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 // Screens
 import PerfilScreen from './src/screens/PerfilScreen';
@@ -48,20 +49,20 @@ function MainTabs({ onLogout }) {
 
           if (route.name === 'Inicio') iconName = 'home';
           else if (route.name === 'Perfil') iconName = 'person';
-          else if (route.name === 'Reportar') iconName = 'flag';
-          else if (route.name === 'Servicios') iconName = 'paw';
+          else if (route.name === 'Reportar') iconName = 'alert-circle';
+          else if (route.name === 'Servicios') iconName = 'storefront';
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#6B5CE7',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: '#03045E',
+        tabBarInactiveTintColor: '#f5f1f1ff',
         tabBarStyle: {
           height: 65,
           paddingBottom: 10,
           paddingTop: 8,
           borderTopWidth: 1,
-          borderTopColor: '#E5E5E5',
-          backgroundColor: '#FFFFFF',
+          borderTopColor: '#00B4D8',
+          backgroundColor: '#00B4D8',
         },
         tabBarLabelStyle: {
           fontSize: 11,

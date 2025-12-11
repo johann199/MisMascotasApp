@@ -47,14 +47,13 @@ export default function MatchScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#7B6BA8" />
+        <ActivityIndicator size="large" color="#03045E" />
         <Text style={styles.loadingText}>Buscando coincidencias...</Text>
         <Text style={styles.loadingSubtext}>Analizando imágenes con IA</Text>
       </View>
     );
   }
 
-  // ✅ Verificar correctamente la estructura de datos
   const matches = matchData?.matches || [];
   const mascotaBase = matchData?.mascota_base;
 
@@ -212,7 +211,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#00B4D8",
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
   },
@@ -308,7 +307,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   rankBadge: {
-    backgroundColor: "#7B6BA8",
+    backgroundColor: "#03045E",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -342,20 +341,20 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   perdidaBadge: {
-    backgroundColor: "#FFEBEE",
+    backgroundColor: "#FF9500",
   },
   encontradaBadge: {
-    backgroundColor: "#E8F5E9",
+    backgroundColor: "#FFD60A",
   },
   tipoText: {
     fontSize: 12,
     fontWeight: "600",
   },
   perdidaText: {
-    color: "#C62828",
+    color: "#751E1E",
   },
   encontradaText: {
-    color: "#2E7D32",
+    color: "#1E5175",
   },
   similarityContainer: {
     flexDirection: "row",

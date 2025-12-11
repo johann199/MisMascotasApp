@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#00B4D8',
   },
   backButton: {
     width: 40,
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   optionButton: {
-    backgroundColor: '#6BB5A4',
+    backgroundColor: '#03045E',
     paddingVertical: 18,
     paddingHorizontal: 24,
     borderRadius: 30,
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   navLabelActive: {
-    color: '#6BB5A4',
+    color: '#03045E',
     fontWeight: '600',
   },
 });

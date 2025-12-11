@@ -139,7 +139,6 @@ const ReportarMascotaPerdidaScreen = ({ navigation }) => {
     return true;
   };
 
-  // Subir reporte
   const handleSubirReporte = async () => {
     if (!validarFormulario()) {
       return;
@@ -431,7 +430,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   submitButton: {
-    backgroundColor: '#7B6BA8',
+    backgroundColor: '#03045E',
     paddingVertical: 18,
     borderRadius: 12,
     marginTop: 8,

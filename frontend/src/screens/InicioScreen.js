@@ -110,7 +110,7 @@ const InicioScreen = ({ navigation }) => {
       {/* Lista de mascotas */}
       {loading && mascotas.length === 0 ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#5BB5A2" />
+          <ActivityIndicator size="large" color="#90E0EF" />
           <Text style={styles.loadingText}>Cargando mascotas...</Text>
         </View>
       ) : (
@@ -121,7 +121,7 @@ const InicioScreen = ({ navigation }) => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={['#5BB5A2']}
+              colors={['#90E0EF']}
             />
           }
         >
@@ -179,7 +179,6 @@ const InicioScreen = ({ navigation }) => {
                   </View>
                 </View>
 
-                {/* ✅ Botón de búsqueda de coincidencias */}
                 <TouchableOpacity
                   style={styles.matchButton}
                   onPress={() => {
@@ -206,7 +205,7 @@ const InicioScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#ffff',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -214,7 +213,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#00B4D8',
   },
   searchInput: {
     flex: 1,
@@ -251,7 +250,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   tabActive: {
-    backgroundColor: '#5BB5A2',
+    backgroundColor: '#90E0EF',
   },
   tabText: {
     fontSize: 14,
@@ -342,33 +341,33 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   estadoBadge: {
-    backgroundColor: '#F5B7B1',
+    backgroundColor: '#FF9500',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
   estadoBadgeEncontrada: {
-    backgroundColor: '#A9DFBF',
+    backgroundColor: '#FFD60A',
   },
   estadoText: {
     fontSize: 13,
-    color: '#C0392B',
+    color: '#751E1E',
     fontWeight: '600',
   },
   estadoTextEncontrada: {
-    color: '#229954',
+    color: '#1E5175',
   },
-  // ✅ Estilos del botón de match
+
   matchButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#7B6BA8',
+    backgroundColor: '#03045E',
     marginHorizontal: 16,
     marginBottom: 16,
     paddingVertical: 12,
     borderRadius: 10,
-    shadowColor: '#7B6BA8',
+    shadowColor: '#03045E',
     shadowOffset: {
       width: 0,
       height: 2,

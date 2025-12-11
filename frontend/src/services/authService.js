@@ -103,7 +103,6 @@ class AuthService {
       await AsyncStorage.removeItem('authToken');
       await AsyncStorage.removeItem('user');
 
-      // 🔥 Notificar logout
       this.notifyAuthChange(false);
 
       return true;
